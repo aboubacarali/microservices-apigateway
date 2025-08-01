@@ -1,29 +1,33 @@
 # ----- STAGE 1: Build -----
+# Utilise Maven avec Java 21
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 
+# Répertoire de travail
 WORKDIR /app
 
-# Utilise le cache Docker au max
+# Copie du pom.xml en premier pour bénéficier du cache Docker
 COPY pom.xml .
 RUN mvn dependency:go-offline
 
 # Copie du code source
 COPY src ./src
 
-# Build sans exécuter les tests
+# Compilation du projet sans les tests
 RUN mvn package -DskipTests
 
 
 # ----- STAGE 2: Runtime -----
-FROM eclipse-temurin:21-jre-focal
+# Image légère avec le JRE Java 21
+FROM eclipse-temurin:21-jre
 
+# Répertoire de travail
 WORKDIR /app
 
-# Copie du jar depuis l’étape de build
+# Copie du .jar depuis l'étape de build
 COPY --from=build /app/target/*.jar app.jar
 
-# Expose le port du microservice
+# Exposition du port (à adapter si ton app tourne ailleurs)
 EXPOSE 8080
 
-# Démarrage de l'application
+# Commande de démarrage
 ENTRYPOINT ["java", "-jar", "app.jar"]

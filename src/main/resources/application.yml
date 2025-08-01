@@ -1,11 +1,13 @@
-# Configuration dans application.yml de la Gateway
+# Le port de la Gateway, c'est le point d'entrée public de notre application.
+# 8080 est un choix standard.
 server:
-  port: 8080 # Le port public de notre application
+  port: 8080
+
+# Nom de l'application
 
 spring:
   application:
     name: api-gateway
-
 
   cloud:
     gateway:
@@ -17,13 +19,14 @@ spring:
       server:
         webmvc:
           routes:
-            # Premi�re route : pour le service produit
             - id: product-service-route
-              # URI de destination. 'lb' signifie "Load Balancer".
-              # La gateway va utiliser Eureka pour trouver une instance de 'product-service'.
+              # L'URI de destination. 'lb' signifie "Load Balanced".
+              # La Gateway va utiliser Eureka pour trouver une instance
+              # de 'product-service'. Le nom ici est l'ID de l'application
+              # enregistrée dans Eureka.
               uri: lb://product-service
+              # Le prédicat qui déclenche cette route
               predicates:
-                # Cette route s'active si le chemin commence par /api/products/
                 - Path=/api/products/**
 
             # Seconde route : pour le service commande
@@ -33,5 +36,6 @@ spring:
                 - Path=/api/orders/**
 eureka:
   client:
-    service-url:
+    serviceUrl:
       defaultZone: http://localhost:8761/eureka
+
