@@ -1,0 +1,37 @@
+# Configuration dans application.yml de la Gateway
+server:
+  port: 8080 # Le port public de notre application
+
+spring:
+  application:
+    name: api-gateway
+
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          lower-case-service-id: true
+          enabled: true
+
+      server:
+        webmvc:
+          routes:
+            # Première route : pour le service produit
+            - id: product-service-route
+              # URI de destination. 'lb' signifie "Load Balancer".
+              # La gateway va utiliser Eureka pour trouver une instance de 'product-service'.
+              uri: lb://product-service
+              predicates:
+                # Cette route s'active si le chemin commence par /api/products/
+                - Path=/api/products/**
+
+            # Seconde route : pour le service commande
+            - id: order-service-route
+              uri: lb://order-service
+              predicates:
+                - Path=/api/orders/**
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
